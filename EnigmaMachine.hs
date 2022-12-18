@@ -2,11 +2,10 @@ module EnigmaMachine where
 
 import Data.List
 import Data.Maybe
-
+--TODO: ringstellung
 
 --wheels
 --plain wheel
-
 
 --plwe = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 plwe = ['A'..'Z']
@@ -17,6 +16,13 @@ we3= "BDFHJLCPRTXVZNYEIWGAKMUSQO"
 --M3 Army
 we4= "ESOVPZJAYQUIRHXLNFTGKDCMWB"
 we5= "VZBRGITYUPSDNHLXAWMJQOFECK"
+
+--reflectors
+--Enigma 1
+refA ="EJMZALYXVBWFCRQUONTSPIKHGD"
+--Enigma M3
+refB="AYBRCUDHEQFSGLIPJXKNMOTZVW"
+refC="AFBVCPDJEIGOHYKRLZMXNWTQSU"
 
 --reflectors
 --Enigma 1
@@ -53,25 +59,23 @@ plugboarding l plug | isNothing ind = l
 
                 
 
-{-
 simpleRotateWheel :: String -> String
-{-but what about the turn next letter??? | x == turnLetter (then turnNext) = 1-}
 simpleRotateWheel (x:xs) = xs ++ [x]
--}
 
--- might work better with tuples instead?
 --[(String,Char),(String,Char),(String,Char)]  
 
-
-rotateWheels :: [(String,Char)] -> [(String,Char)] 
+rotateWheels :: [(String,Char)] -> [(String,Char)]
+-- called with the exsisting wheel configurations to turn the wheels once
 rotateWheels [(xs,xTurn),(ys,yTurn),(zs,zTurn)]
                     | isNextTurn xs xTurn && isNextTurn ys yTurn = [(simpleRotateWheel xs,xTurn),(simpleRotateWheel ys,yTurn),(simpleRotateWheel zs,zTurn)]
                     | isNextTurn xs xTurn = [(simpleRotateWheel xs,xTurn),(simpleRotateWheel ys,yTurn),(zs,zTurn)]
                     | otherwise = [(simpleRotateWheel xs,xTurn),(ys,yTurn),(zs,zTurn)]
-                    where simpleRotateWheel (first:tail) = tail ++ [first]
-                          isNextTurn (first:_) turn = first == turn
+                    where isNextTurn (first:_) turn = first == turn
 
-freeWheel :: [Int] -> [(String,Char)] -> [(String,Char)]
+freeWheel :: [Char] -> [(String,Char)] -> [(String,Char)]
 --set Grundstellung: the starting configurations
-freeWheel [xTurns,yTurns,zTurns] --unfinished XXXXX
-
+--takes the letter that each wheel should be starting at (the one which would be visible through the screen)
+freeWheel [xStart,yStart,zStart] [(xs,xTurn),(ys,yTurn),(zs,zTurn)] =
+            [(spin xStart xs,xTurn),(spin yStart ys,yTurn),(spin zStart zs,zTurn)]
+            where spin start (first:tail) | start == first = first:tail
+                                          | otherwise = spin start (simpleRotateWheel (first:tail))
